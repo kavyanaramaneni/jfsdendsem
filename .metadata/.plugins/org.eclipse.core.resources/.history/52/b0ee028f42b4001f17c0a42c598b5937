@@ -1,0 +1,5 @@
+package com.klef.jfsd.exam.hibernate_hcql_project;
+
+public class ClientDemo {
+
+}

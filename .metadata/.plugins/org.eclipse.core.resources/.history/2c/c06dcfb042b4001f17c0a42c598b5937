@@ -1,0 +1,52 @@
+package com.klef.jfsd.exam.hibernate_hcql_project;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Projections;
+public class ClientDemo {
+   public static void main(String[] args) {
+	   
+	   Configuration cfg=new Configuration();
+	   cfg.configure("hibernate.cfg.xml");
+       cfg.addAnnotatedClass(Project.class);
+       
+       SessionFactory sessionFactory = cfg.buildSessionFactory();
+       Session session = sessionFactory.openSession();
+       Transaction transaction = session.beginTransaction();
+       
+       Project p1 = new Project("Project A", 12, 500000, "Alice");
+       Project p2 = new Project("Project B", 8, 300000, "Bob");
+       session.save(p1);
+       session.save(p2);
+
+       // 2. Aggregate Functions
+       Criteria criteria = session.createCriteria(Project.class);
+
+       // Count
+       criteria.setProjection(Projections.rowCount());
+       System.out.println("Total Projects: " + criteria.uniqueResult());
+
+       // Max
+       criteria.setProjection(Projections.max("budget"));
+       System.out.println("Max Budget: " + criteria.uniqueResult());
+
+       // Min
+       criteria.setProjection(Projections.min("budget"));
+       System.out.println("Min Budget: " + criteria.uniqueResult());
+
+       // Sum
+       criteria.setProjection(Projections.sum("budget"));
+       System.out.println("Total Budget: " + criteria.uniqueResult());
+
+       // Average
+       criteria.setProjection(Projections.avg("budget"));
+       System.out.println("Average Budget: " + criteria.uniqueResult());
+
+       transaction.commit();
+       session.close();
+       sessionFactory.close();
+	   
+   }
+}

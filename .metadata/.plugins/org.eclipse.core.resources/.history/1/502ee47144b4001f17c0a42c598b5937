@@ -1,0 +1,58 @@
+package com.klef.jfsd.exam.hibernate_hcql_project;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
+import org.hibernate.cfg.Configuration;
+import javax.persistence.criteria.*;
+
+public class ClientDemo {
+   public static void main(String[] args) {
+       Configuration cfg = new Configuration();
+       cfg.configure("hibernate.cfg.xml");
+       cfg.addAnnotatedClass(Project.class);
+       
+       SessionFactory sessionFactory = cfg.buildSessionFactory();
+       Session session = sessionFactory.openSession();
+       Transaction transaction = session.beginTransaction();
+       
+       Project p1 = new Project("Project A", 12, 500000, "Alice");
+       Project p2 = new Project("Project B", 8, 300000, "Bob");
+       session.save(p1);
+       session.save(p2);
+
+       // 2. Aggregate Functions with CriteriaBuilder
+       CriteriaBuilder cb = session.getCriteriaBuilder();
+       CriteriaQuery<Double> cqDouble = cb.createQuery(Double.class);
+       Root<Project> root = cqDouble.from(Project.class);
+
+       // Count
+       CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+       countQuery.select(cb.count(root));
+       Long count = session.createQuery(countQuery).getSingleResult();
+       System.out.println("Total Projects: " + count);
+
+       // Max Budget
+       cqDouble.select(cb.max(root.get("budget")));
+       Double maxBudget = session.createQuery(cqDouble).getSingleResult();
+       System.out.println("Max Budget: " + maxBudget);
+
+       // Min Budget
+       cqDouble.select(cb.min(root.get("budget")));
+       Double minBudget = session.createQuery(cqDouble).getSingleResult();
+       System.out.println("Min Budget: " + minBudget);
+
+       // Sum Budget
+       cqDouble.select(cb.sum(root.get("budget")));
+       Double totalBudget = session.createQuery(cqDouble).getSingleResult();
+       System.out.println("Total Budget: " + totalBudget);
+
+       // Average Budget
+       cqDouble.select(cb.avg(root.get("budget")));
+       Double avgBudget = session.createQuery(cqDouble).getSingleResult();
+       System.out.println("Average Budget: " + avgBudget);
+
+       transaction.commit();
+       session.close();
+       sessionFactory.close();
+   }
+}
